@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { recipeAPI } from '../../services/api';
 import RecipeChat from '../chat/RecipeChat';
 import NutritionModal from '../recipe/modals/NutritionModal';
@@ -8,8 +8,11 @@ import SatisfactionModal from '../recipe/modals/SatisfactionModal';
 import SubstituteIngredientModal from '../recipe/SubstituteIngredientModal';
 import './RecipeViewWithChat.css';
 
+const LOCAL_STORAGE_RECIPE_KEY = 'current_recipe_data';
+
 const RecipeViewWithChat = ({ user, isAuthenticated }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,22 +21,76 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
   const [showSatisfaction, setShowSatisfaction] = useState(false);
   const [showSubstitute, setShowSubstitute] = useState(false);
   const [nutritionData, setNutritionData] = useState(null);
+  const [nutritionLoading, setNutritionLoading] = useState(false); // 영양 정보 로딩 상태
+  const [nutritionError, setNutritionError] = useState(null); // 영양 정보 오류 상태
   const [satisfactionSubmitted, setSatisfactionSubmitted] = useState(false);
 
-  // 레시피 데이터 초기화
+  // 레시피 데이터 초기화 - 새로고침 대응 로직 추가
   useEffect(() => {
-    // location.state에서 레시피 데이터 확인
-    if (location.state?.generatedRecipe) {
-      console.log('레시피 데이터 확인:', location.state.generatedRecipe);
-      setRecipe(location.state.generatedRecipe);
-      setLoading(false);
+    const loadRecipeData = async () => {
+      setLoading(true);
+      
+      try {
+        // 1. location.state에서 레시피 데이터 확인
+        if (location.state?.generatedRecipe) {
+          console.log('레시피 데이터 확인 (라우터 state):', location.state.generatedRecipe);
+          const recipeData = location.state.generatedRecipe;
+          
+          // 레시피 데이터를 로컬 스토리지에 저장
+          localStorage.setItem(LOCAL_STORAGE_RECIPE_KEY, JSON.stringify(recipeData));
+          
+          setRecipe(recipeData);
+          setError(null);
+          
+          // state를 URL 히스토리에서 제거 (새로고침 시 중복 표시 방지)
+          window.history.replaceState({}, document.title);
+        } 
+        // 2. 로컬 스토리지에서 저장된 레시피 데이터 복원 시도
+        else {
+          const savedRecipeData = localStorage.getItem(LOCAL_STORAGE_RECIPE_KEY);
+          
+          if (savedRecipeData) {
+            console.log('저장된 레시피 데이터 복원 (로컬 스토리지)');
+            const recipeData = JSON.parse(savedRecipeData);
+            setRecipe(recipeData);
+            setError(null);
+          } 
+          // 3. 레시피 ID가 URL에 있다면 API로 데이터 가져오기 시도
+          else if (location.search) {
+            const params = new URLSearchParams(location.search);
+            const recipeId = params.get('id');
+            
+            if (recipeId) {
+              console.log(`레시피 ID로 데이터 요청: ${recipeId}`);
+              
+              try {
+                // API를 통해 레시피 데이터 가져오기 (필요시 구현)
+                // const response = await recipeAPI.getRecipeById(recipeId);
+                // setRecipe(response.data);
+                // setError(null);
+                
+                // 지금은 API가 없으므로 오류 표시
+                setError('API를 통한 레시피 조회가 구현되지 않았습니다.');
+              } catch (err) {
+                console.error('레시피 데이터 가져오기 오류:', err);
+                setError('레시피 데이터를 가져오는 중 오류가 발생했습니다.');
+              }
+            } else {
+              setError('유효한 레시피 ID가 없습니다.');
+            }
+          } else {
+            setError('레시피 데이터를 찾을 수 없습니다.');
+          }
+        }
+      } catch (err) {
+        console.error('레시피 데이터 처리 오류:', err);
+        setError('레시피 데이터 처리 중 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      // state를 URL 히스토리에서 제거 (새로고침 시 중복 표시 방지)
-      window.history.replaceState({}, document.title);
-    } else {
-      setError('레시피 데이터를 찾을 수 없습니다.');
-      setLoading(false);
-    }
+    loadRecipeData();
   }, [location]);
 
   // 영양 정보 가져오기
@@ -43,21 +100,45 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
       return;
     }
     
-    setLoading(true);
+    // 모달 먼저 표시
+    setShowNutrition(true);
+    // 로딩 상태 설정
+    setNutritionLoading(true);
+    setNutritionError(null);
+
     try {
       console.log(`영양 정보 요청 - 레시피 ID: ${recipe.id}`);
+
       // 영양 정보 API 호출
       const response = await recipeAPI.getNutrition(recipe.id);
       console.log('영양 정보 응답:', response.data);
-      
-      if (response.data) {
-        setNutritionData(response.data);
-        setShowNutrition(true);
-        setError(null);
+
+      // 여기에 디버깅 로그 추가
+      console.log('응답 데이터 타입:', typeof response.data);
+      console.log('응답 데이터 내용:', JSON.stringify(response.data));
+
+      // 명시적으로 로딩 상태 종료
+      setNutritionLoading(false);
+        
+      if (response.data && response.data) {
+        // 응답 데이터를 직접 설정 (객체 복사 방식 사용)
+        const data = response.data;
+        setNutritionData({
+          calories: data.calories || 0,
+          carbohydrate: data.carbohydrate || 0,
+          protein: data.protein || 0,
+          fat: data.fat || 0,
+          sugar: data.sugar || 0,
+          sodium: data.sodium || 0,
+          saturatedFat: data.saturatedFat || 0,
+          transFat: data.transFat || 0,
+          cholesterol: data.cholesterol || 0
+        });
+        console.log("영양 정보 업데이트 완료");
       } else {
         // 응답은 성공했지만 데이터가 없는 경우
-        setError('영양 정보가 제공되지 않았습니다');
-        // 기본 영양 정보로 모달 표시
+        setNutritionError('영양 정보가 제공되지 않았습니다');
+        // 기본 영양 정보로 설정
         setNutritionData({
           calories: 500,
           carbohydrate: 30,
@@ -69,11 +150,13 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
           transFat: 0,
           cholesterol: 50
         });
-        setShowNutrition(true);
       }
     } catch (err) {
       console.error('영양 정보 가져오기 오류:', err);
       
+      // 명시적으로 로딩 상태 종료
+      setNutritionLoading(false);
+
       // 오류가 발생해도 기본 영양 정보로 모달 표시
       setNutritionData({
         calories: 500,
@@ -88,7 +171,6 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
       });
       
       setError('영양 정보를 가져오는데 실패했습니다. 기본값을 표시합니다.');
-      setShowNutrition(true);
     } finally {
       setLoading(false);
     }
@@ -99,10 +181,13 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
     setSatisfactionSubmitted(true);
   };
   
-  // 대체 레시피 생성 성공 처리
+  // 대체 레시피 생성 성공 시, 로컬 스토리지 업데이트
   const handleSubstituteSuccess = (newRecipe) => {
     if (newRecipe && newRecipe.success) {
       setRecipe(newRecipe);
+      
+      // 로컬 스토리지 업데이트
+      localStorage.setItem(LOCAL_STORAGE_RECIPE_KEY, JSON.stringify(newRecipe));
     }
     setShowSubstitute(false);
   };
@@ -119,7 +204,18 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
 
   // 레시피가 없는 경우
   if (!recipe) {
-    return <div className="error-message">레시피를 찾을 수 없습니다.</div>;
+    return (
+      <div className="error-message">
+        레시피를 찾을 수 없습니다.
+        <button 
+          onClick={() => navigate('/recipe/upload')} 
+          className="return-button"
+          style={{ marginLeft: '15px', padding: '8px 15px' }}
+        >
+          레시피 만들기
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -188,12 +284,14 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
           {error && <div className="error-message">{error}</div>}
         </div>
         
-        {/* 영양 정보 모달 */}
-        {showNutrition && nutritionData && (
+        {/* 영양 정보 모달 - 로딩 상태 처리 */}
+        {showNutrition && (
           <NutritionModal 
             nutrition={nutritionData} 
             recipeName={recipe.name}
             onClose={() => setShowNutrition(false)} 
+            loading={nutritionLoading}
+            error={nutritionError}
           />
         )}
         

@@ -51,6 +51,66 @@
   padding: 20px;
 }
 
+/* 로딩 표시 스타일 */
+.nutrition-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 5px solid rgba(76, 175, 80, 0.2);
+  border-top-color: #4CAF50;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.nutrition-loading p {
+  color: #666;
+  font-size: 16px;
+}
+
+/* 오류 표시 스타일 */
+.nutrition-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.error-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f44336;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.nutrition-error p {
+  color: #f44336;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.error-subtitle {
+  color: #666 !important;
+  font-size: 14px !important;
+}
+
 .main-nutrition {
   text-align: center;
   margin-bottom: 20px;
@@ -88,6 +148,12 @@
   margin-top: 20px;
 }
 
+.nutrition-details h4 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
 .nutrition-details table {
   width: 100%;
   border-collapse: collapse;
@@ -109,6 +175,12 @@
 
 .nutrition-vitamins {
   margin-top: 20px;
+}
+
+.nutrition-vitamins h4 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 16px;
 }
 
 .vitamin-bar {
@@ -454,6 +526,22 @@
   .nutrition-item {
     flex-basis: 50%;
     margin-bottom: 10px;
+  }
+  
+  .star-rating {
+    font-size: 24px;
+  }
+  
+  .star {
+    margin: 0 3px;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .form-actions button {
+    width: 100%;
   }
 }
 

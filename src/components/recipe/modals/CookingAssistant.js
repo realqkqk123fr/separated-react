@@ -5,6 +5,8 @@ function CookingAssistant({ recipe, onClose }) {
   const [timer, setTimer] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  // 자동 이동 옵션을 위한 상태 추가
+  const [autoAdvance, setAutoAdvance] = useState(true);
   const steps = recipe && recipe.instructions ? recipe.instructions : [];
   
   // 현재 단계의 조리 시간 구하기 (초 단위)
@@ -35,6 +37,7 @@ function CookingAssistant({ recipe, onClose }) {
         if (prevTime <= 1) {
           clearInterval(interval);
           setIsTimerRunning(false);
+          
           // 타이머 완료 시 알림음
           try {
             const audio = new Audio('/timer-alarm.mp3');
@@ -42,6 +45,14 @@ function CookingAssistant({ recipe, onClose }) {
           } catch (e) {
             console.log('알림음 재생 오류:', e);
           }
+          
+          // 자동 이동이 켜져 있고, 마지막 단계가 아닌 경우에만 다음 단계로 이동
+          if (autoAdvance && currentStep < steps.length - 1) {
+            setTimeout(() => {
+              goToNextStep();
+            }, 1500);
+          }
+          
           return 0;
         }
         return prevTime - 1;
@@ -51,6 +62,11 @@ function CookingAssistant({ recipe, onClose }) {
     setTimer(interval);
   };
   
+  // 자동 이동 옵션 토글 핸들러
+  const toggleAutoAdvance = () => {
+    setAutoAdvance(!autoAdvance);
+  };
+
   // 타이머 취소
   const cancelTimer = () => {
     if (timer) {
@@ -167,62 +183,81 @@ function CookingAssistant({ recipe, onClose }) {
           <button className="close-button" onClick={onClose}>×</button>
         </div>
         
-        <div className="cooking-steps">
-          <div className="step-navigation">
-            <button 
-              onClick={goToPrevStep} 
-              disabled={currentStep === 0}
-              className="step-button prev-button"
-            >
-              이전
-            </button>
-            <div className="step-counter">
-              {formatStepCount()} ({calculateTotalCookingTime()})
-            </div>
-            <button 
-              onClick={goToNextStep} 
-              disabled={currentStep === steps.length - 1}
-              className="step-button next-button"
-            >
-              다음
-            </button>
-          </div>
-          
-          <div className="step-container">
-            {steps.map((step, index) => (
-              <div 
-                key={index} 
-                className={`step-item ${index === currentStep ? 'active' : ''}`}
-                style={{ display: index === currentStep ? 'block' : 'none' }}
-              >
-                <div className="step-header">
-                  <h4>Step {step.stepNumber || index + 1}</h4>
-                  <div className="step-time">{formatCookingTime(index)}</div>
-                </div>
-                <p className="step-instruction">{step.instruction || '조리 단계'}</p>
-                
-                <div className="timer-controls">
-                  {!isTimerRunning ? (
-                    <button 
-                      onClick={startTimer}
-                      className="timer-button"
-                    >
-                      {formatCookingTime(index)} 타이머 시작
-                    </button>
-                  ) : (
-                    <div className="timer-running">
-                      <div className="timer-display">{formatTime(timeRemaining)}</div>
-                      <button onClick={cancelTimer} className="timer-cancel-button">
-                        취소
+        <div className="cooking-layout">
+          {/* 메인 콘텐츠 영역 - 왼쪽에 넓게 배치 */}
+          <div className="main-content-area">
+            {/* 조리 단계 내용 영역 */}
+            <div className="step-content">
+              {steps.map((step, index) => (
+                <div 
+                  key={index} 
+                  className={`step-item ${index === currentStep ? 'active' : ''}`}
+                  style={{ display: index === currentStep ? 'block' : 'none' }}
+                >
+                  <div className="step-header">
+                    <h4>Step {step.stepNumber || index + 1}</h4>
+                    <div className="step-time">{formatCookingTime(index)}</div>
+                  </div>
+                  <p className="step-instruction">{step.instruction || '조리 단계'}</p>
+                  
+                  <div className="timer-display-area">
+                    {isTimerRunning ? (
+                      <div className="timer-running">
+                        <div className="timer-display">{formatTime(timeRemaining)}</div>
+                        <button onClick={cancelTimer} className="timer-cancel-button">
+                          취소
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={startTimer}
+                        className="timer-button"
+                      >
+                        {formatCookingTime(index)} 타이머 시작
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
+              ))}
+            </div>
+            
+            {/* 하단 컨트롤 영역 - 조리 단계 아래에 작게 배치 */}
+            <div className="controls-area">
+              <div className="navigation-controls">
+                <button 
+                  onClick={goToPrevStep} 
+                  disabled={currentStep === 0}
+                  className="nav-button prev-button"
+                >
+                  이전
+                </button>
+                <span className="step-counter">
+                  {currentStep + 1}/{steps.length}
+                </span>
+                <button 
+                  onClick={goToNextStep} 
+                  disabled={currentStep === steps.length - 1}
+                  className="nav-button next-button"
+                >
+                  다음
+                </button>
               </div>
-            ))}
+              
+              <div className="auto-advance-option">
+                <label className="auto-advance-label">
+                  <input
+                    type="checkbox"
+                    checked={autoAdvance}
+                    onChange={() => setAutoAdvance(!autoAdvance)}
+                    className="auto-advance-checkbox"
+                  />
+                  <span>타이머 종료 후 자동으로 다음 단계 이동</span>
+                </label>
+              </div>
+            </div>
           </div>
           
-          {/* 재료 사이드바 */}
+          {/* 재료 사이드바 - 오른쪽에 배치 (현재대로 유지) */}
           <div className="ingredients-sidebar">
             <h4>재료</h4>
             <ul className="ingredients-list">

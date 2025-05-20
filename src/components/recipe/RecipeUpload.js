@@ -74,11 +74,12 @@ const RecipeUpload = ({ user }) => {
         console.log("Recipe owner user ID:", response.data.userId);
         
         // 통합 페이지로 이동하면서 생성된 레시피 데이터 전달
-        navigate('/recipe/view', { 
-        state: { 
+        // URL 파라미터에 레시피 ID 추가
+        navigate(`/recipe/view?id=${response.data.id}`, { 
+          state: { 
             generatedRecipe: response.data,
             fromRecipeUpload: true
-        } 
+          } 
         });
     } catch (err) {
         console.error('레시피 생성 오류:', err);

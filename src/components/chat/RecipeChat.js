@@ -9,6 +9,7 @@ const RecipeChat = ({ user, isAuthenticated, initialRecipe, compactMode = false 
   const [connecting, setConnecting] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
   const [sessionId, setSessionId] = useState('');
+  const [initialMessageAdded, setInitialMessageAdded] = useState(false); // 초기 메시지 추가 여부 추적
 
   const messagesEndRef = useRef(null);
 
@@ -96,21 +97,39 @@ const RecipeChat = ({ user, isAuthenticated, initialRecipe, compactMode = false 
     return setupConnection();
   }, []);
 
-  // initialRecipe가 제공되면 첫 메시지로 추가
+  // initialRecipe가 제공되면 첫 메시지로 추가 - 중복 방지 로직 추가
   useEffect(() => {
-    if (initialRecipe && messages.length <= 2) { // 연결 메시지만 있을 때
+    if (initialRecipe && !initialMessageAdded) { // 초기 메시지가 아직 추가되지 않았을 때만 실행
       console.log("초기 레시피 메시지 추가:", initialRecipe.name);
       
-      // AI 레시피 안내 메시지 추가
-      const recipeMessage = {
-        username: 'AI 요리사',
-        message: `안녕하세요! "${initialRecipe.name}" 레시피에 관한 질문이 있으시면 물어보세요.`,
-        timestamp: new Date().toISOString()
-      };
-      
-      setMessages(prevMessages => [...prevMessages, recipeMessage]);
+      // 연결 상태 확인
+      if (!connecting && !connectionError) {
+        // AI 레시피 안내 메시지 추가
+        const recipeMessage = {
+          username: 'AI 요리사',
+          message: `안녕하세요! "${initialRecipe.name}" 레시피에 관한 질문이 있으시면 물어보세요.`,
+          timestamp: new Date().toISOString()
+        };
+        
+        setMessages(prevMessages => {
+          // 이미 동일한 메시지가 있는지 확인
+          const isDuplicate = prevMessages.some(msg => 
+            msg.username === 'AI 요리사' && 
+            msg.message.includes(initialRecipe.name)
+          );
+          
+          // 중복이 아닌 경우에만 메시지 추가
+          if (!isDuplicate) {
+            return [...prevMessages, recipeMessage];
+          }
+          return prevMessages;
+        });
+        
+        // 초기 메시지 추가 상태 업데이트
+        setInitialMessageAdded(true);
+      }
     }
-  }, [initialRecipe, messages]);
+  }, [initialRecipe, connecting, connectionError, initialMessageAdded]);
 
   // 메시지 스크롤 관리
   useEffect(() => {

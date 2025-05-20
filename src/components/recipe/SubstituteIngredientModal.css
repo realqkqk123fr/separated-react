@@ -1,0 +1,130 @@
+.substitute-modal {
+  width: 500px;
+  max-width: 90vw;
+}
+
+.substitute-form {
+  padding: 0 20px 20px;
+}
+
+.substitute-form .form-group {
+  margin-bottom: 20px;
+}
+
+.substitute-form .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.substitute-form .form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.substitute-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.success-container {
+  text-align: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-container .success-icon {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+  color: white;
+  font-size: 30px;
+  line-height: 60px;
+  margin-bottom: 15px;
+}
+
+.success-container h4 {
+  color: #4CAF50;
+  margin-bottom: 15px;
+}
+
+.recipe-description {
+  color: #666;
+  margin: 15px 0;
+}
+
+.success-container .ingredients-list {
+  text-align: left;
+  margin: 20px 0;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.success-container .ingredients-list h5 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.success-container .ingredients-list ul {
+  padding-left: 20px;
+}
+
+.success-container .ingredients-list li {
+  margin-bottom: 5px;
+}
+
+.close-modal-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.close-modal-button:hover {
+  background-color: #45a049;
+}
+
+/* 오류 메시지 스타일 */
+.error-message {
+  background-color: #ffe6e6;
+  color: #d32f2f;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 576px) {
+  .substitute-form .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .substitute-form .form-actions button {
+    width: 100%;
+  }
+  
+  .success-container {
+    padding: 15px;
+  }
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

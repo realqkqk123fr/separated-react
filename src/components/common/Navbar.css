@@ -1,0 +1,91 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  color: #fff;
+  padding: 0 20px;
+  height: 60px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-logo a {
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* 간격 일정하게 유지 */
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  transition: color 0.3s, border-bottom 0.3s;
+  padding-bottom: 3px;
+}
+
+.nav-link:hover {
+  color: #4CAF50;
+}
+
+/* 활성 메뉴 표시 */
+.nav-link.active {
+  color: #4CAF50;
+  font-weight: bold;
+  border-bottom: 2px solid #4CAF50;
+}
+
+.logout-button {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin-left: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #fff;
+  color: #333;
+}
+
+.user-greeting {
+  margin-left: 20px;
+  color: #ccc;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+  }
+  
+  .navbar-logo {
+    margin-bottom: 10px;
+  }
+  
+  .navbar-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  
+  .nav-link, .logout-button, .user-greeting {
+    margin: 5px 0;
+  }
+  
+  .user-greeting {
+    order: -1;
+    margin-bottom: 10px;
+  }
+}

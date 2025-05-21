@@ -216,59 +216,48 @@
   font-weight: 500;
 }
 
-/* 요리 어시스턴스 모달 스타일 */
+/* 요리 어시스턴스 모달 레이아웃 수정 */
 .cooking-assistant-modal {
-  width: 700px;
-  max-width: 90vw;
+  width: 800px;
+  max-width: 95vw;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
 }
 
-.cooking-steps {
+.cooking-layout {
   display: flex;
   flex: 1;
-  position: relative;
   overflow: hidden;
+  height: calc(80vh - 60px);
 }
 
-.step-navigation {
+.main-content-area {
+  flex: 1; 
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
-}
-
-.step-counter {
-  font-weight: bold;
-  color: #333;
-}
-
-.step-button {
-  padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.step-button:hover:not(:disabled) {
-  background-color: #45a049;
-}
-
-.step-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.step-item {
+  flex-direction: column;
+  width: 65%;
   padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid #e0e0e0;
+}
+
+.step-content {
   flex: 1;
-  max-width: 65%;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.controls-area {
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.ingredients-sidebar {
+  width: 35%;
+  padding: 20px;
+  background-color: #f9f9f9;
+  overflow-y: auto;
 }
 
 .step-header {
@@ -276,6 +265,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 .step-header h4 {
@@ -298,12 +289,14 @@
   margin-bottom: 20px;
 }
 
-.timer-controls {
+.timer-display-area {
   margin-top: 20px;
+  display: flex;
+  justify-content: center;
 }
 
 .timer-button {
-  padding: 10px 16px;
+  padding: 10px 20px;
   background-color: #2196F3;
   color: white;
   border: none;
@@ -320,12 +313,12 @@
 .timer-running {
   display: flex;
   align-items: center;
+  gap: 15px;
 }
 
 .timer-display {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
-  margin-right: 15px;
   color: #2196F3;
 }
 
@@ -343,12 +336,58 @@
   background-color: #d32f2f;
 }
 
-.ingredients-sidebar {
-  width: 35%;
-  background-color: #f9f9f9;
-  border-left: 1px solid #e0e0e0;
-  padding: 20px;
-  overflow-y: auto;
+.navigation-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.nav-button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.nav-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.nav-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.step-counter {
+  font-weight: bold;
+  color: #333;
+  min-width: 60px;
+  text-align: center;
+}
+
+.auto-advance-option {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.auto-advance-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.auto-advance-checkbox {
+  width: 16px;
+  height: 16px;
 }
 
 .ingredients-list {
@@ -370,6 +409,24 @@
 
 .ingredient-amount {
   color: #666;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .cooking-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .main-content-area {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .ingredients-sidebar {
+    width: 100%;
+  }
 }
 
 /* 만족도 평가 모달 스타일 */

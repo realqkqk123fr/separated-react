@@ -183,8 +183,9 @@ function CookingAssistant({ recipe, onClose }) {
           <button className="close-button" onClick={onClose}>×</button>
         </div>
         
+        {/* 레이아웃 수정: 명확한 좌우 분할 구조 */}
         <div className="cooking-layout">
-          {/* 메인 콘텐츠 영역 - 왼쪽에 넓게 배치 */}
+          {/* 왼쪽 패널: 메인 조리 단계와 컨트롤 */}
           <div className="main-content-area">
             {/* 조리 단계 내용 영역 */}
             <div className="step-content">
@@ -221,7 +222,7 @@ function CookingAssistant({ recipe, onClose }) {
               ))}
             </div>
             
-            {/* 하단 컨트롤 영역 - 조리 단계 아래에 작게 배치 */}
+            {/* 하단 컨트롤 영역 */}
             <div className="controls-area">
               <div className="navigation-controls">
                 <button 
@@ -232,7 +233,7 @@ function CookingAssistant({ recipe, onClose }) {
                   이전
                 </button>
                 <span className="step-counter">
-                  {currentStep + 1}/{steps.length}
+                  {formatStepCount()}
                 </span>
                 <button 
                   onClick={goToNextStep} 
@@ -248,7 +249,7 @@ function CookingAssistant({ recipe, onClose }) {
                   <input
                     type="checkbox"
                     checked={autoAdvance}
-                    onChange={() => setAutoAdvance(!autoAdvance)}
+                    onChange={toggleAutoAdvance}
                     className="auto-advance-checkbox"
                   />
                   <span>타이머 종료 후 자동으로 다음 단계 이동</span>
@@ -257,7 +258,7 @@ function CookingAssistant({ recipe, onClose }) {
             </div>
           </div>
           
-          {/* 재료 사이드바 - 오른쪽에 배치 (현재대로 유지) */}
+          {/* 오른쪽 패널: 재료 사이드바 */}
           <div className="ingredients-sidebar">
             <h4>재료</h4>
             <ul className="ingredients-list">

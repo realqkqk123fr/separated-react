@@ -128,10 +128,10 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
           });
         }
         
-        // 5초 후 모달 자동 닫기 (사용자가 오류를 읽을 시간 제공)
-        setTimeout(() => {
-          onClose();
-        }, 5000);
+        // 대체 실패 시 자동 닫기 방지 (이 부분이 수정됨)
+        // setTimeout(() => {
+        //   onClose();
+        // }, 5000);
         
         return;
       }
@@ -217,10 +217,10 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
         });
       }
 
-      // 오류 시 5초 후 모달 자동 닫기
-      setTimeout(() => {
-        onClose();
-      }, 5000);
+      // 오류 시 자동 닫기 방지 (이 부분이 수정됨)
+      // setTimeout(() => {
+      //   onClose();
+      // }, 5000);
     } finally {
       setLoading(false);
     }
@@ -338,6 +338,19 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
                   {loading ? '처리 중...' : '대체 레시피 생성'}
                 </button>
               </div>
+              
+              {/* 실패 시 확인 버튼 추가 */}
+              {error && (
+                <div className="error-actions">
+                  <button 
+                    type="button" 
+                    className="error-confirm-button"
+                    onClick={onClose}
+                  >
+                    확인
+                  </button>
+                </div>
+              )}
             </form>
           )}
         </div>

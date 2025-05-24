@@ -227,6 +227,9 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
       }, 5000);
       
       console.log('레시피 업데이트 완료:', updatedRecipe);
+      
+      // 영양 정보 갱신 요청 (새로 추가된 부분)
+      refreshNutritionInfo(updatedRecipe.id);
     } else {
       // 실패한 경우 오류 메시지 표시
       const errorMessage = substituteResult?.message || '대체 재료 처리에 실패했습니다.';
@@ -242,6 +245,33 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
     
     // 모달 닫기
     setShowSubstitute(false);
+  };
+
+  // 영양 정보 갱신 함수 (새로 추가)
+  const refreshNutritionInfo = async (recipeId) => {
+    if (!recipeId) {
+      console.warn('영양 정보 갱신 실패: 레시피 ID가 없습니다.');
+      return;
+    }
+    
+    try {
+      console.log(`영양 정보 갱신 요청 - 레시피 ID: ${recipeId}`);
+      
+      // 새로운 API 엔드포인트 호출
+      const response = await recipeAPI.refreshNutrition(recipeId);
+      console.log('영양 정보 갱신 응답:', response.data);
+      
+      // 갱신된 영양 정보 상태 업데이트
+      setNutritionData(response.data);
+      
+      // 영양 정보가 갱신되었음을 사용자에게 알림
+      const currentSuccessMsg = successMessage;
+      setSuccessMessage(currentSuccessMsg + " 영양 정보도 갱신되었습니다.");
+      
+    } catch (err) {
+      console.error('영양 정보 갱신 오류:', err);
+      // 실패해도 사용자 경험에 영향을 주지 않기 위해 조용히 실패
+    }
   };
 
   // 성공/오류 메시지 자동 제거 Effect

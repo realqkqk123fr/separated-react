@@ -119,17 +119,7 @@
   background-color: #45a049;
 }
 
-/* 개선된 오류 메시지 스타일 */
-.error-message {
-  background-color: #ffebee;
-  border: 1px solid #ffcdd2;
-  color: #d32f2f;
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  text-align: left;
-  animation: errorShake 0.5s ease;
-}
+
 
 .error-message strong {
   display: block;
@@ -431,15 +421,6 @@
   animation: highlightFade 2s ease-out;
 }
 
-@keyframes highlightFade {
-  0% {
-    background-color: #c8e6c9;
-  }
-  100% {
-    background-color: #e8f5e9;
-  }
-}
-
 /* 로딩 상태 개선 */
 .substitute-form .form-group input:disabled {
   background-color: #f5f5f5;
@@ -510,4 +491,102 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* 실패 시 확인 버튼 스타일 추가 */
+.error-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.error-confirm-button {
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.error-confirm-button:hover {
+  background-color: #d32f2f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 오류 메시지 컨테이너 강화 */
+.error-message {
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  color: #d32f2f;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: left;
+  animation: errorShake 0.5s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 강조된 재료 표시 */
+.highlighted-ingredient {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  position: relative;
+  animation: highlightPulse 2s infinite;
+}
+
+@keyframes highlightPulse {
+  0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+  70% { box-shadow: 0 0 0 5px rgba(46, 125, 50, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+}
+
+/* 업데이트된 영양 정보 표시 */
+.nutrition-updated {
+  position: relative;
+}
+
+.nutrition-updated::after {
+  content: "업데이트됨";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  transform: translate(5px, -5px);
+}
+
+/* 성공 알림 애니메이션 개선 */
+.success-notification {
+  animation: fadeInUp 0.5s ease-out, highlightFade 2s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes highlightFade {
+  0% {
+    background-color: #c8e6c9;
+  }
+  100% {
+    background-color: #d4edda;
+  }
 }

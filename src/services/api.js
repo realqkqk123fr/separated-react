@@ -139,6 +139,15 @@ export const recipeAPI = {
     } catch (error) {
       throw error;
     }
+  },
+
+  refreshNutrition: async (recipeId) => {
+    try {
+      return await api.get(`/api/recipe/${recipeId}/refresh-nutrition`);
+    } catch (error) {
+      console.error('영양 정보 갱신 API 오류:', error);
+      throw error;
+    }
   }
 };
 

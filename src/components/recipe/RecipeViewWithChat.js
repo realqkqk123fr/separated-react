@@ -204,6 +204,12 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
         ingredients: substituteResult.ingredients || recipe.ingredients,
         instructions: substituteResult.instructions || recipe.instructions
       };
+
+      // 조리법이 비어있는지 확인하고 디버깅 로그 출력
+      console.log('업데이트된 레시피 조리법:', updatedRecipe.instructions);
+      if (!updatedRecipe.instructions || updatedRecipe.instructions.length === 0) {
+        console.warn('업데이트된 레시피의 조리법이 비어있습니다!');
+      }
       
       // 레시피 상태 업데이트
       setRecipe(updatedRecipe);

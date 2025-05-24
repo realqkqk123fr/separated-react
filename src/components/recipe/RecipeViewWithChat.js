@@ -16,13 +16,14 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(''); // 성공 메시지 상태 추가
   const [showNutrition, setShowNutrition] = useState(false);
   const [showAssistance, setShowAssistance] = useState(false);
   const [showSatisfaction, setShowSatisfaction] = useState(false);
   const [showSubstitute, setShowSubstitute] = useState(false);
   const [nutritionData, setNutritionData] = useState(null);
-  const [nutritionLoading, setNutritionLoading] = useState(false); // 영양 정보 로딩 상태
-  const [nutritionError, setNutritionError] = useState(null); // 영양 정보 오류 상태
+  const [nutritionLoading, setNutritionLoading] = useState(false);
+  const [nutritionError, setNutritionError] = useState(null);
   const [satisfactionSubmitted, setSatisfactionSubmitted] = useState(false);
 
   // 레시피 데이터 초기화 - 새로고침 대응 로직 추가
@@ -179,11 +180,19 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
   // 만족도 제출 성공 처리
   const handleSatisfactionSuccess = () => {
     setSatisfactionSubmitted(true);
+    setSuccessMessage('만족도 평가가 성공적으로 제출되었습니다!');
+    
+    // 3초 후 성공 메시지 자동 제거
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000);
   };
   
-  // 대체 레시피 생성 성공 시, 로컬 스토리지 업데이트
+  // 대체 레시피 생성 성공 시, 로컬 스토리지 업데이트 (강화된 버전)
   const handleSubstituteSuccess = (substituteResult) => {
-    if (substituteResult && substituteResult.success) {
+    console.log('대체 재료 콜백 수신:', substituteResult);
+
+    if (substituteResult && substituteResult.success !== false) {
       console.log('대체 재료 성공, 레시피 업데이트:', substituteResult);
       
       // 현재 레시피를 새로운 대체 레시피로 업데이트
@@ -202,23 +211,57 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
       // 로컬 스토리지도 업데이트
       localStorage.setItem(LOCAL_STORAGE_RECIPE_KEY, JSON.stringify(updatedRecipe));
       
-      // 사용자에게 업데이트 알림
-      setError(''); // 기존 오류 메시지 클리어
+      // 기존 오류 메시지 클리어
+      setError('');
       
-      // 성공 메시지 표시 (임시)
-      const successMessage = `레시피가 업데이트되었습니다! ${substituteResult.substitutionInfo?.original || '재료'}를 ${substituteResult.substitutionInfo?.substitute || '대체재료'}로 변경했습니다.`;
+      // 성공 메시지 표시
+      const originalIngredient = substituteResult.substitutionInfo?.original || '재료';
+      const substituteIngredient = substituteResult.substitutionInfo?.substitute || '대체재료';
+      const successMsg = `✅ 레시피가 성공적으로 업데이트되었습니다! ${originalIngredient}를 ${substituteIngredient}로 변경했습니다.`;
       
-      // 임시 성공 메시지 표시 후 자동 사라짐
-      setError(successMessage);
+      setSuccessMessage(successMsg);
+      
+      // 5초 후 성공 메시지 자동 제거
       setTimeout(() => {
-        setError('');
-      }, 3000);
+        setSuccessMessage('');
+      }, 5000);
       
       console.log('레시피 업데이트 완료:', updatedRecipe);
+    } else {
+      // 실패한 경우 오류 메시지 표시
+      const errorMessage = substituteResult?.message || '대체 재료 처리에 실패했습니다.';
+      console.log('대체 재료 실패:', errorMessage);
+      
+      setError(errorMessage);
+      
+      // 5초 후 오류 메시지 자동 제거
+      setTimeout(() => {
+        setError('');
+      }, 5000);
     }
     
+    // 모달 닫기
     setShowSubstitute(false);
   };
+
+  // 성공/오류 메시지 자동 제거 Effect
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
   
   // 로딩 중 상태 표시
   if (loading) {
@@ -255,6 +298,20 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
         </div>
 
         <div className="recipe-content">
+          {/* 성공 메시지 표시 영역 */}
+          {successMessage && (
+            <div className="success-notification" role="alert">
+              {successMessage}
+            </div>
+          )}
+
+          {/* 오류 메시지 표시 영역 (레시피가 있을 때만) */}
+          {error && (
+            <div className="error-notification" role="alert">
+              ⚠️ {error}
+            </div>
+          )}
+
           <div className="recipe-ingredients">
             <h3>재료</h3>
             <ul className="ingredients-list">
@@ -308,8 +365,6 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
               대체 재료
             </button>
           </div>
-          
-          {error && <div className="error-message">{error}</div>}
         </div>
         
         {/* 영양 정보 모달 - 로딩 상태 처리 */}

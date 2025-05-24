@@ -23,12 +23,18 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
     setError(''); // 입력 시 오류 메시지 초기화
   };
 
-  // 대체 재료 요청 핸들러
+  // 대체 재료 요청 핸들러 (수정됨)
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!originalIngredient.trim() || !substituteIngredient.trim()) {
       setError('원래 재료와 대체 재료를 모두 입력해주세요.');
+      return;
+    }
+
+    // 같은 재료인지 확인
+    if (originalIngredient.trim().toLowerCase() === substituteIngredient.trim().toLowerCase()) {
+      setError('같은 재료로는 대체할 수 없습니다.');
       return;
     }
     
@@ -63,24 +69,52 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
         return;
       }
 
-      // 대체 불가 메시지 확인 (더 포괄적인 검사)
+      // 대체 불가 메시지 확인 (강화된 검사)
       const isSubstituteFailure = 
+        // 명시적 실패 플래그 확인
         responseData.substituteFailure === true ||
+        responseData.success === false ||
+        
+        // 설명 문구에서 실패 키워드 검사
         (responseData.description && (
           responseData.description.includes("적절하지 않") || 
           responseData.description.includes("생성할 수 없") ||
           responseData.description.includes("대체할 수 없") ||
           responseData.description.includes("불가능") ||
-          responseData.description.includes("적절하지 않아")
+          responseData.description.includes("적절하지 않아") ||
+          responseData.description.includes("유사도") ||
+          responseData.description.includes("레시피를 생성할 수 없습니다")
         )) || 
+        
+        // 메시지 필드에서 실패 키워드 검사
+        (responseData.message && (
+          responseData.message.includes("대체할 수 없") ||
+          responseData.message.includes("적절하지 않") ||
+          responseData.message.includes("불가능")
+        )) ||
+        
+        // 필수 데이터 누락 확인
         (!responseData.ingredients || responseData.ingredients.length === 0) ||
         (!responseData.instructions || responseData.instructions.length === 0) ||
-        (!responseData.name || responseData.name.trim() === '');
+        (!responseData.name || responseData.name.trim() === '') ||
+        
+        // 이름에 실패 표시가 포함된 경우
+        (responseData.name && (
+          responseData.name.includes("적절하지 않") ||
+          responseData.name.includes("생성할 수 없")
+        ));
       
       if (isSubstituteFailure) {
         // 대체 재료 사용 실패로 처리
-        const errorMessage = responseData.description || 
-                            `${originalIngredient}를 ${substituteIngredient}로 대체할 수 없습니다.`;
+        let errorMessage = '';
+        
+        if (responseData.description) {
+          errorMessage = responseData.description;
+        } else if (responseData.message) {
+          errorMessage = responseData.message;
+        } else {
+          errorMessage = `${originalIngredient}를 ${substituteIngredient}로 대체할 수 없습니다. 재료의 특성이 너무 달라 적절한 레시피를 만들 수 없습니다.`;
+        }
         
         console.log('대체 실패 감지:', errorMessage);
         setError(errorMessage);
@@ -90,14 +124,14 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
           onSuccess({
             success: false,
             message: errorMessage,
-            description: responseData.description
+            description: responseData.description || responseData.message
           });
         }
         
-        // 3초 후 모달 자동 닫기 (사용자가 오류를 읽을 시간 제공)
+        // 5초 후 모달 자동 닫기 (사용자가 오류를 읽을 시간 제공)
         setTimeout(() => {
           onClose();
-        }, 3000);
+        }, 5000);
         
         return;
       }
@@ -124,10 +158,10 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
         });
       }
 
-      // 성공 시 2.5초 후 모달 자동 닫기
+      // 성공 시 3초 후 모달 자동 닫기
       setTimeout(() => {
         onClose();
-      }, 2500);
+      }, 3000);
 
     } catch (err) {
       console.error('대체 재료 요청 오류:', err);
@@ -154,12 +188,23 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
           case 500:
             errorMessage = '서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
             break;
+          case 503:
+            errorMessage = 'AI 서비스가 일시적으로 이용할 수 없습니다. 잠시 후 다시 시도해주세요.';
+            break;
           default:
             errorMessage = `서버 오류가 발생했습니다 (${status}). 다시 시도해주세요.`;
         }
+
+        // 응답 본문에 대체 실패 정보가 있는 경우
+        if (responseData && (responseData.substituteFailure || responseData.success === false)) {
+          errorMessage = responseData.message || responseData.description || errorMessage;
+        }
       } else if (err.request) {
         // 네트워크 오류
-        errorMessage = '네트워크 연결을 확인해주세요.';
+        errorMessage = '네트워크 연결을 확인해주세요. 인터넷 연결이 불안정하거나 서버에 접근할 수 없습니다.';
+      } else if (err.message && err.message.includes('timeout')) {
+        // 타임아웃 오류
+        errorMessage = '요청 시간이 초과되었습니다. AI 처리에 시간이 오래 걸리고 있습니다. 잠시 후 다시 시도해주세요.';
       }
       
       setError(errorMessage);
@@ -171,6 +216,11 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
           message: errorMessage
         });
       }
+
+      // 오류 시 5초 후 모달 자동 닫기
+      setTimeout(() => {
+        onClose();
+      }, 5000);
     } finally {
       setLoading(false);
     }
@@ -188,7 +238,7 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
           {success ? (
             <div className="success-container">
               <div className="success-icon">✓</div>
-              <h4>레시피가 업데이트되었습니다!</h4>
+              <h4>레시피가 성공적으로 업데이트되었습니다!</h4>
               
               <div className="substitution-details">
                 <p className="substitution-summary">
@@ -217,7 +267,7 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
                   <h5>업데이트된 주요 재료</h5>
                   <ul>
                     {newRecipe.ingredients.slice(0, 5).map((ingredient, index) => (
-                      <li key={index} className={ingredient.name === substituteIngredient ? 'highlighted' : ''}>
+                      <li key={index} className={ingredient.name.toLowerCase().includes(substituteIngredient.toLowerCase()) ? 'highlighted' : ''}>
                         <span className="ingredient-name">{ingredient.name}</span>
                         <span className="ingredient-amount">{ingredient.amount}</span>
                       </li>
@@ -239,6 +289,7 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
                 <div className="error-message" role="alert">
                   <strong>⚠️ 대체 불가능</strong>
                   <p>{error}</p>
+                  <p className="error-hint">다른 재료를 시도해보시거나, 더 비슷한 특성을 가진 재료를 선택해주세요.</p>
                 </div>
               )}
               

@@ -1,3 +1,5 @@
+/* 기존 스타일 유지하면서 오류 메시지 개선 */
+
 .substitute-modal {
   width: 500px;
   max-width: 90vw;
@@ -24,6 +26,19 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.substitute-form .form-group input:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  outline: none;
+}
+
+.substitute-form .form-group input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .substitute-form .form-actions {
@@ -49,6 +64,13 @@
   font-size: 30px;
   line-height: 60px;
   margin-bottom: 15px;
+  animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .success-container h4 {
@@ -97,18 +119,107 @@
   background-color: #45a049;
 }
 
-/* 오류 메시지 스타일 */
+/* 개선된 오류 메시지 스타일 */
 .error-message {
-  background-color: #ffe6e6;
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
   color: #d32f2f;
-  padding: 10px;
+  padding: 15px;
   border-radius: 4px;
   margin-bottom: 20px;
-  text-align: center;
+  text-align: left;
+  animation: errorShake 0.5s ease;
+}
+
+.error-message strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #c62828;
+}
+
+.error-message p {
+  margin: 0;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+@keyframes errorShake {
+  0%, 20%, 40%, 60%, 80% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+}
+
+/* 버튼 스타일 개선 */
+.submit-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.submit-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #e5e5e5;
+  border-color: #bbb;
+}
+
+.cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 로딩 상태 표시 */
+.submit-button:disabled::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
 }
 
 /* 모바일 반응형 */
 @media (max-width: 576px) {
+  .substitute-modal {
+    width: 95vw;
+    margin: 10px;
+  }
+  
   .substitute-form .form-actions {
     flex-direction: column;
     gap: 8px;
@@ -121,10 +232,282 @@
   .success-container {
     padding: 15px;
   }
+  
+  .error-message {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .error-message strong {
+    font-size: 15px;
+  }
 }
 
 /* 애니메이션 */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 추가적인 시각적 피드백 */
+.form-group input.error {
+  border-color: #f44336;
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+.form-group input.success {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* 툴팁 스타일 (선택사항) */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* 대체 재료 성공 화면 추가 스타일 */
+/* 대체 재료 성공 화면 추가 스타일 */
+.substitution-details {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+  border: 1px solid #e9ecef;
+}
+
+.substitution-summary {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.original-ingredient {
+  color: #6c757d;
+  text-decoration: line-through;
+}
+
+.arrow {
+  color: #4CAF50;
+  font-weight: bold;
+  margin: 0 10px;
+}
+
+.substitute-ingredient {
+  color: #4CAF50;
+}
+
+.similarity-info, .amount-info {
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0;
+  text-align: center;
+}
+
+.updated-ingredients-preview {
+  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 6px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+}
+
+.updated-ingredients-preview h5 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 16px;
+}
+
+.updated-ingredients-preview ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.updated-ingredients-preview li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+
+.updated-ingredients-preview li:last-child {
+  border-bottom: none;
+}
+
+.updated-ingredients-preview li.highlighted {
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  padding: 8px 10px;
+  border: 1px solid #4CAF50;
+  margin: 2px 0;
+}
+
+.updated-ingredients-preview li.highlighted .ingredient-name {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.updated-ingredients-preview li.highlighted .ingredient-amount {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.more-ingredients {
+  font-style: italic;
+  color: #888;
+  justify-content: center !important;
+  border-bottom: none !important;
+  padding-top: 10px;
+}
+
+/* 레시피 업데이트 알림 (RecipeViewWithChat에서 사용) */
+.recipe-update-notification {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+.recipe-update-notification.success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.recipe-update-notification.error {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 재료 리스트에서 업데이트된 재료 강조 */
+.ingredient-item.updated {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4CAF50;
+  padding-left: 12px;
+  animation: highlightFade 2s ease-out;
+}
+
+@keyframes highlightFade {
+  0% {
+    background-color: #c8e6c9;
+  }
+  100% {
+    background-color: #e8f5e9;
+  }
+}
+
+/* 로딩 상태 개선 */
+.substitute-form .form-group input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: #ddd;
+}
+
+.substitute-form.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.substitute-form.loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 향상된 애니메이션 */
+.success-container {
+  animation: successSlideIn 0.4s ease-out;
+}
+
+@keyframes successSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 대체 재료 타입별 색상 구분 (선택사항) */
+.substitute-type-similar {
+  color: #4CAF50;
+}
+
+.substitute-type-different {
+  color: #FF9800;
+}
+
+.substitute-type-warning {
+  color: #f44336;
+}
+
+/* 접근성 개선 */
+.substitute-modal [role="alert"] {
+  live: polite;
+}
+
+.substitute-modal .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

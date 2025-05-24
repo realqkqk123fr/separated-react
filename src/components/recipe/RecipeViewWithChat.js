@@ -182,16 +182,44 @@ const RecipeViewWithChat = ({ user, isAuthenticated }) => {
   };
   
   // 대체 레시피 생성 성공 시, 로컬 스토리지 업데이트
-  const handleSubstituteSuccess = (newRecipe) => {
-    if (newRecipe && newRecipe.success) {
-      setRecipe(newRecipe);
+  const handleSubstituteSuccess = (substituteResult) => {
+    if (substituteResult && substituteResult.success) {
+      console.log('대체 재료 성공, 레시피 업데이트:', substituteResult);
       
-      // 로컬 스토리지 업데이트
-      localStorage.setItem(LOCAL_STORAGE_RECIPE_KEY, JSON.stringify(newRecipe));
+      // 현재 레시피를 새로운 대체 레시피로 업데이트
+      const updatedRecipe = {
+        ...recipe,
+        id: substituteResult.id || recipe.id,
+        name: substituteResult.name || recipe.name,
+        description: substituteResult.description || recipe.description,
+        ingredients: substituteResult.ingredients || recipe.ingredients,
+        instructions: substituteResult.instructions || recipe.instructions
+      };
+      
+      // 레시피 상태 업데이트
+      setRecipe(updatedRecipe);
+      
+      // 로컬 스토리지도 업데이트
+      localStorage.setItem(LOCAL_STORAGE_RECIPE_KEY, JSON.stringify(updatedRecipe));
+      
+      // 사용자에게 업데이트 알림
+      setError(''); // 기존 오류 메시지 클리어
+      
+      // 성공 메시지 표시 (임시)
+      const successMessage = `레시피가 업데이트되었습니다! ${substituteResult.substitutionInfo?.original || '재료'}를 ${substituteResult.substitutionInfo?.substitute || '대체재료'}로 변경했습니다.`;
+      
+      // 임시 성공 메시지 표시 후 자동 사라짐
+      setError(successMessage);
+      setTimeout(() => {
+        setError('');
+      }, 3000);
+      
+      console.log('레시피 업데이트 완료:', updatedRecipe);
     }
+    
     setShowSubstitute(false);
   };
-
+  
   // 로딩 중 상태 표시
   if (loading) {
     return <div className="loading-recipe">레시피 정보를 불러오는 중...</div>;

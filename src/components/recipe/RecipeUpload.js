@@ -98,9 +98,9 @@ const RecipeUpload = ({ user }) => {
   return (
     <div className="recipe-upload-container">
       <div className="recipe-upload-card">
-        <h2>레시피 생성하기</h2>
+        <h2>요리한컷</h2>
         <p className="recipe-upload-description">
-          재료 이미지를 업로드하고 원하는 레시피에 대한 지시사항을 입력해주세요.
+          재료 이미지를 업로드하고 원하는 요리에 대한 지시사항을 입력해주세요.
         </p>
         
         {error && <div className="error-message">{error}</div>}
@@ -149,7 +149,7 @@ const RecipeUpload = ({ user }) => {
               id="instructions"
               value={instructions}
               onChange={handleInstructionsChange}
-              placeholder="원하는 레시피에 대한 지시사항을 입력해주세요. (예: '간단한 저녁 식사', '건강한 샐러드', '30분 안에 만들 수 있는 요리')"
+              placeholder="원하는 요리에 대한 지시사항을 입력해주세요. (예: '간단한 저녁 식사', '건강한 샐러드', '30분 안에 만들 수 있는 요리')"
               className="instructions-input"
               rows={5}
             />

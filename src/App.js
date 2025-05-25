@@ -10,7 +10,8 @@ import MyPage from './components/user/MyPage';
 import RecipeChat from './components/chat/RecipeChat';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import RecipeUpload from './components/recipe/RecipeUpload';
-import RecipeViewWithChat from './components/recipe/RecipeViewWithChat'; // 새로운 컴포넌트 import
+import RecipeViewWithChat from './components/recipe/RecipeViewWithChat';
+import HomePage from './components/home/HomePage'; // 새로운 홈페이지 컴포넌트 (필요시 생성)
 
 import './App.css';
 
@@ -123,6 +124,12 @@ function App() {
         
         <div className="container">
           <Routes>
+            {/* 홈페이지 라우트 (모든 사용자) */}
+            <Route 
+              path="/" 
+              element={<HomePage isAuthenticated={isAuthenticated} />}
+            />
+            
             {/* 공개 경로 */}
             <Route 
               path="/login" 
@@ -162,7 +169,7 @@ function App() {
               } 
             />
             
-            {/* 새로운 통합 페이지 (레시피 + 채팅) */}
+            {/* 레시피 + 채팅 통합 페이지 */}
             <Route 
               path="/recipe/view" 
               element={
@@ -172,14 +179,10 @@ function App() {
               } 
             />
             
-            {/* 기본 경로를 레시피 업로드 페이지로 변경 */}
+            {/* 존재하지 않는 경로는 홈으로 리다이렉트 */}
             <Route 
-              path="/" 
-              element={
-                isAuthenticated ? 
-                <Navigate to="/recipe/upload" /> : 
-                <Navigate to="/login" />
-              }
+              path="*" 
+              element={<Navigate to="/" />} 
             />
           </Routes>
         </div>

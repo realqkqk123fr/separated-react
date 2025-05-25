@@ -73,8 +73,44 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
         return;
       }
 
-      // 대체 불가능한 경우 처리 - 명시적인 확인
-      if (responseData.substituteFailure === true || responseData.success === false) {
+      // 🔧 수정된 실패 검증 로직
+      const isExplicitFailure = (
+        responseData.substituteFailure === true || 
+        responseData.success === false
+      );
+
+      // 🔧 추가 실패 조건 검사 (완화됨)
+      const hasValidName = (
+        responseData.name && 
+        responseData.name.trim() !== '' && 
+        !responseData.name.includes('적절하지 않') &&
+        !responseData.name.includes('생성할 수 없')
+      );
+
+      const hasValidInstructions = (
+        responseData.instructions && 
+        Array.isArray(responseData.instructions) && 
+        responseData.instructions.length > 0
+      );
+
+      // 🔧 수정: 재료는 선택사항으로 변경
+      const hasValidIngredients = (
+        responseData.ingredients && 
+        Array.isArray(responseData.ingredients) && 
+        responseData.ingredients.length > 0
+      );
+
+      console.log('검증 결과:', {
+        isExplicitFailure,
+        hasValidName,
+        hasValidInstructions,
+        hasValidIngredients,
+        ingredientsCount: responseData.ingredients?.length || 0,
+        instructionsCount: responseData.instructions?.length || 0
+      });
+
+      // 🔧 수정된 실패 조건: 명시적 실패이거나 이름/조리법이 없는 경우만 실패
+      if (isExplicitFailure || !hasValidName || !hasValidInstructions) {
         // 대체 실패 메시지 설정
         let errorMessage = '';
         
@@ -82,15 +118,19 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
           errorMessage = responseData.description;
         } else if (responseData.message) {
           errorMessage = responseData.message;
+        } else if (!hasValidName) {
+          errorMessage = '유효한 레시피 이름을 생성할 수 없습니다.';
+        } else if (!hasValidInstructions) {
+          errorMessage = '조리법을 생성할 수 없습니다.';
         } else {
-          errorMessage = `${originalIngredient}를 ${substituteIngredient}로 대체할 수 없습니다. 자세한 이유는 제공되지 않았습니다.`;
+          errorMessage = `${originalIngredient}를 ${substituteIngredient}로 대체할 수 없습니다.`;
         }
         
         console.log('대체 실패 감지:', errorMessage);
         setError(errorMessage);
         setLoading(false);
         
-        // 여기서 onSuccess 콜백을 호출하지만, 모달은 닫지 않습니다
+        // 실패 콜백 호출
         if (onSuccess) {
           onSuccess({
             success: false,
@@ -99,21 +139,23 @@ const SubstituteIngredientModal = ({ recipeName, recipeId, onClose, onSuccess })
           });
         }
         
-        // 중요: 여기서 리턴만 하고 모달을 닫지 않음
-        return;
-      }
-      
-      // 명시적 실패가 아닌 경우에도 확인 - 재료나 조리법이 빈 경우
-      if (!responseData.ingredients || responseData.ingredients.length === 0 ||
-          !responseData.instructions || responseData.instructions.length === 0) {
-        console.error('응답에 필수 데이터가 없음:', responseData);
-        setError('레시피에 필요한 정보가 부족합니다. 다시 시도해주세요.');
-        setLoading(false);
         return;
       }
 
-      // 성공 처리
+      // 🔧 성공 처리 - 재료가 없어도 성공으로 처리
       console.log('대체 성공:', responseData);
+      
+      // 재료가 없는 경우 기본 재료 추가
+      if (!hasValidIngredients) {
+        console.log('재료가 없어 기본 재료 추가');
+        responseData.ingredients = [
+          {
+            name: substituteIngredient,
+            amount: '적당량'
+          }
+        ];
+      }
+
       setNewRecipe(responseData);
       setSuccess(true);
       setLoading(false);

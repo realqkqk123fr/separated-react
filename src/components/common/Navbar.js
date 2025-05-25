@@ -16,7 +16,10 @@ const Navbar = ({ isAuthenticated, user, onLogout }) => {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <Link to="/">레시피 AI 어시스턴트</Link>
+        <Link to="/">
+          <span role="img" aria-label="recipe icon" className="logo-icon">🍲</span>
+          요리한컷
+        </Link>
       </div>
       
       <div className="navbar-links">

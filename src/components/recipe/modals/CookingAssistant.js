@@ -17,11 +17,14 @@ function CookingAssistant({ recipe, onClose }) {
     
     // 초 단위 값이 있으면 사용
     if (currentInstruction.cookingTimeSeconds) {
-      return currentInstruction.cookingTimeSeconds;
+      // 0이 아닌 값만 사용, 0이면 기본값(300초) 사용
+      return currentInstruction.cookingTimeSeconds > 0 ? 
+        currentInstruction.cookingTimeSeconds : 300;
     }
     
-    // 초 단위 값이 없으면 분 단위에서 변환
-    return (currentInstruction.cookingTime || 5) * 60;
+    // 초 단위 값이 없거나 0이면 분 단위에서 변환
+    const minutes = currentInstruction.cookingTime || 5;
+    return minutes * 60;
   };
   
   // 타이머 설정
@@ -126,18 +129,22 @@ function CookingAssistant({ recipe, onClose }) {
     
     // 초 단위 값이 있으면 사용
     if (step.cookingTimeSeconds) {
-      const mins = Math.floor(step.cookingTimeSeconds / 60);
-      const secs = step.cookingTimeSeconds % 60;
+      const totalSeconds = step.cookingTimeSeconds;
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
       
-      if (secs === 0) {
+      if (mins > 0 && secs > 0) {
+        return `${mins}분 ${secs}초`;
+      } else if (mins > 0) {
         return `${mins}분`;
       } else {
-        return `${mins}분 ${secs}초`;
+        return `${secs}초`;
       }
     }
     
     // 초 단위 값이 없으면 분 단위만 표시
-    return `${step.cookingTime || 5}분`;
+    const mins = step.cookingTime || 5;
+    return `${mins}분`;
   };
   
   // 레시피 총 조리 시간 계산
